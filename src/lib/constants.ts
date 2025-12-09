@@ -36,7 +36,9 @@ function validateTreasuryAddress(): `0x${string}` {
 }
 
 export const CONTRACT_ADDRESSES = {
-  fbc: (process.env.NEXT_PUBLIC_FBC_ADDRESS || '0xcb6e9f9bab4164eaa97c982dee2d2aaffdb9ab07') as `0x${string}`,
+  soccerhunt: (process.env.NEXT_PUBLIC_SOCCERHUNT_ADDRESS || process.env.NEXT_PUBLIC_FBC_ADDRESS || '0xa9FB226BFB5DCA0A0b95D5A478B83334dE875746') as `0x${string}`,
+  // Legacy alias for ongoing refactor; keep temporarily
+  fbc: (process.env.NEXT_PUBLIC_SOCCERHUNT_ADDRESS || process.env.NEXT_PUBLIC_FBC_ADDRESS || '0xa9FB226BFB5DCA0A0b95D5A478B83334dE875746') as `0x${string}`,
   treasury: validateTreasuryAddress(),
   marketplace: (process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS || '0x0000000000000000000000000000000000000000') as `0x${string}`,
   starterClaim: (process.env.NEXT_PUBLIC_STARTER_CLAIM_ADDRESS || '0x0000000000000000000000000000000000000000') as `0x${string}`,
@@ -44,7 +46,9 @@ export const CONTRACT_ADDRESSES = {
 
 export const ENTRY_FEE = {
   usd: 1,
-  fbc: '1000000000000000000', // 1 FBC in wei (placeholder, actual conversion needed)
+  soccerhunt: '1000000000000000000', // 1 SOCCERHUNT in wei (placeholder)
+  // Legacy alias for ongoing refactor
+  fbc: '1000000000000000000',
 } as const;
 
 export const MARKETPLACE_CONFIG = {
@@ -57,7 +61,9 @@ export const MARKETPLACE_CONFIG = {
 export const AUCTION_CONFIG = {
   durationHours: 48,
   minIncrementBps: 200, // 2%
-  minIncrementFbc: '1000000000000000000', // 1 FBC
+  minIncrementSoccerhunt: '1000000000000000000', // 1 SOCCERHUNT
+  // Legacy alias for ongoing refactor
+  minIncrementFbc: '1000000000000000000',
   antiSnipeWindowMinutes: 3,
   antiSnipeExtendMinutes: 3,
 } as const;
@@ -143,7 +149,9 @@ export const API_ENDPOINTS = {
     leaderboard: '/api/season/leaderboard',
   },
   pricing: {
-    fbcUsd: '/api/pricing/fbc-usd',
+    soccerhuntUsd: '/api/pricing/soccerhunt-usd',
+    // Legacy alias for ongoing refactor
+    fbcUsd: '/api/pricing/soccerhunt-usd',
     quote: '/api/pricing/quote',
   },
 } as const;
