@@ -34,7 +34,7 @@ const publicClient = createPublicClient({ chain: base, transport: http(CHAIN_CON
 async function fetchFromMintClub(): Promise<string | null> {
   try {
     const tokenAddr = (process.env.NEXT_PUBLIC_SOCCERHUNT_ADDRESS || process.env.NEXT_PUBLIC_FBC_ADDRESS || CONTRACT_ADDRESSES.fbc) as `0x${string}`;
-    const sdk = mintclub.withPublicClient(publicClient);
+    const sdk = mintclub.withPublicClient(publicClient as any);
     const res = await sdk.network('base').token(tokenAddr).getUsdRate({ amount: 1 });
     const rate = res?.usdRate;
     if (typeof rate === 'number' && isFinite(rate) && rate > 0) {
