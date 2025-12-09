@@ -51,7 +51,7 @@ const tutorialSteps: TutorialStep[] = [
   {
     id: 'market',
     title: 'Transfer Market 💰',
-    description: 'Buy, sell, and auction players using FBC tokens on Base blockchain. Build value through smart trading.',
+    description: 'Buy, sell, and auction players using SOCCERHUNT tokens on Base blockchain. Build value through smart trading.',
     image: '🤝',
     action: 'Continue',
   },

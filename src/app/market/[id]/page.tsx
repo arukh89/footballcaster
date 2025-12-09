@@ -12,7 +12,7 @@ import { PriceTag } from '@/components/glass/PriceTag';
 import { useFarcasterIdentity } from '@/hooks/useFarcasterIdentity';
 import { useWallet } from '@/hooks/useWallet';
 import { API_ENDPOINTS } from '@/lib/constants';
-import { payInFBC } from '@/lib/wallet-utils';
+import { payInSOCCERHUNT } from '@/lib/wallet-utils';
 import { formatFBC } from '@/lib/utils';
 import { ChevronLeft, ShoppingCart } from 'lucide-react';
 import { createWalletClient, http, createPublicClient } from 'viem';
@@ -87,8 +87,8 @@ export default function MarketDetailPage(): React.JSX.Element {
       const sellerWallet = listing.sellerWallet as `0x${string}`;
       const amountWei = listing.priceFbcWei;
 
-      // Pay in FBC
-      const { hash } = await payInFBC(walletClient as any, walletPublicClient as any, sellerWallet, amountWei);
+      // Pay in SOCCERHUNT
+      const { hash } = await payInSOCCERHUNT(walletClient as any, walletPublicClient as any, sellerWallet, amountWei);
 
       // Verify and execute purchase
       const res = await fetch(API_ENDPOINTS.market.buy, {

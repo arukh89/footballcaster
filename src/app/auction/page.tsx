@@ -16,7 +16,7 @@ import { useFarcasterIdentity } from '@/hooks/useFarcasterIdentity';
 import type { Auction } from '@/lib/types';
 import { API_ENDPOINTS } from '@/lib/constants';
 import { useWallet } from '@/hooks/useWallet';
-import { payInFBC } from '@/lib/wallet-utils';
+import { payInSOCCERHUNT } from '@/lib/wallet-utils';
 
 export default function AuctionPage(): React.JSX.Element {
   const { identity } = useFarcasterIdentity();
@@ -80,8 +80,8 @@ export default function AuctionPage(): React.JSX.Element {
       const sellerWallet = info.sellerWallet as `0x${string}`;
       const amountWei = info.buyNowFbcWei as string;
 
-      // Pay in FBC
-      const { hash } = await payInFBC(walletClient, publicClient, sellerWallet, amountWei);
+      // Pay in SOCCERHUNT
+      const { hash } = await payInSOCCERHUNT(walletClient, publicClient, sellerWallet, amountWei);
 
       // Verify and execute buy-now
       const bnRes = await fetch(API_ENDPOINTS.auction.buyNow, {
@@ -211,7 +211,7 @@ export default function AuctionPage(): React.JSX.Element {
                 <div className="font-semibold mb-1">Auction Rules</div>
                 <div className="text-muted-foreground space-y-1">
                   <div>• 48-hour duration with reserve price at Pt value</div>
-                  <div>• Minimum 2% bid increment or 1 FBC (whichever is greater)</div>
+                  <div>• Minimum 2% bid increment or 1 SOCCERHUNT (whichever is greater)</div>
                   <div>• Anti-snipe: bids in last 3 minutes extend by 3 minutes (once)</div>
                   <div>• Optional Buy Now price for instant purchase</div>
                 </div>

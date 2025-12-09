@@ -279,7 +279,7 @@ export default function HomePage(): JSX.Element {
                   </div>
                   <h3 className="font-bold mb-2">Enter & Get Started</h3>
                   <p className="text-sm text-muted-foreground">
-                    Pay $1 in FBC and receive your starter pack of 18 tradable players
+                    Pay $1 in SOCCERHUNT and receive your starter pack of 18 tradable players
                   </p>
                 </div>
               </GlassCard>
@@ -315,7 +315,7 @@ export default function HomePage(): JSX.Element {
             <GlassCard>
               <h3 className="font-bold text-lg mb-4">Key Features</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <StatPill label="Entry Fee" value="$1 FBC" variant="info" />
+                <StatPill label="Entry Fee" value="$1 SOCCERHUNT" variant="info" />
                 <StatPill label="Starter Players" value="18" variant="success" />
                 <StatPill label="Hold Period" value="7 days" variant="warning" />
                 <StatPill label="Market Fee" value="2%" variant="default" />

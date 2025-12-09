@@ -162,7 +162,7 @@ function encodeV3PathExactOutput(tokens: `0x${string}`[], fees: number[]): `0x${
 }
 
 /**
- * Ensure FBC token allowance for a spender
+ * Ensure SOCCERHUNT token allowance for a spender
  */
 export async function ensureAllowance(
   walletClient: WalletClient,
@@ -178,7 +178,7 @@ export async function ensureAllowance(
 
     // Check current allowance using public client
     const currentAllowance = await readContract(publicClient, {
-      address: CONTRACT_ADDRESSES.fbc,
+      address: CONTRACT_ADDRESSES.soccerhunt,
       abi: ERC20_ABI,
       functionName: 'allowance',
       args: [account, spender],
@@ -193,7 +193,7 @@ export async function ensureAllowance(
 
     // Request approval
     const hash = await walletClient.writeContract({
-      address: CONTRACT_ADDRESSES.fbc,
+      address: CONTRACT_ADDRESSES.soccerhunt,
       abi: ERC20_ABI,
       functionName: 'approve',
       args: [spender, minAmountBigInt],
@@ -212,10 +212,10 @@ export async function ensureAllowance(
 }
 
 /**
- * Pay in FBC tokens
+ * Pay in SOCCERHUNT tokens
  * Optionally batches approve + transfer if EIP-5792 is supported
  */
-export async function payInFBC(
+export async function payInSOCCERHUNT(
   walletClient: WalletClient,
   publicClient: PublicClient,
   to: `0x${string}`,
@@ -228,183 +228,20 @@ export async function payInFBC(
 
     // Pre-check balance to surface friendly error before simulate/write
     const balance = await readContract(publicClient, {
-      address: CONTRACT_ADDRESSES.fbc,
+      address: CONTRACT_ADDRESSES.soccerhunt,
       abi: ERC20_ABI,
       functionName: 'balanceOf',
       args: [account],
     });
     if (balance < amountBigInt) {
-      // Attempt auto-swap from ETH → FBC for the missing amount via 0x on Base
-      const missing = amountBigInt - balance;
-      try {
-        const url = `${OX_QUOTE_URL}?sellToken=ETH&buyToken=${CONTRACT_ADDRESSES.fbc}&buyAmount=${missing}&takerAddress=${account}&slippagePercentage=0.02&includedSources=Uniswap_V3&skipValidation=true`;
-        const res = await fetch(url, { headers: { accept: 'application/json' } });
-        if (!res.ok) throw new Error(`0x quote failed (${res.status})`);
-        const q = await res.json();
-        const toAddr: `0x${string}` = q.to;
-        const data: `0x${string}` = q.data;
-        const value: bigint = BigInt(q.value || '0');
-
-        const swapHash = await walletClient.sendTransaction({
-          account,
-          to: toAddr,
-          data,
-          value,
-          chain: base,
-        });
-        await waitForTransactionReceipt(publicClient, { hash: swapHash });
-      } catch (swapErr) {
-        // Fallback A: try Uniswap v3 SwapRouter02 direct swap (ETH -> WETH -> FBC) exactOutputSingle
-        try {
-          const amountOut = missing;
-          let best: { fee: number; amountIn: bigint } | null = null;
-
-          for (const fee of V3_FEE_TIERS) {
-            try {
-              const res: any = await readContract(publicClient, {
-                address: UNISWAP_V3_QUOTER_V2,
-                abi: QUOTER_V2_ABI as any,
-                functionName: 'quoteExactOutputSingle',
-                args: [{ tokenIn: WETH_BASE, tokenOut: CONTRACT_ADDRESSES.fbc, amount: amountOut, fee, sqrtPriceLimitX96: 0n }],
-              });
-              const amountIn = BigInt(res?.[0] ?? res?.amountIn ?? '0');
-              if (amountIn > 0n && (!best || amountIn < best.amountIn)) {
-                best = { fee, amountIn };
-              }
-            } catch {}
-          }
-
-          if (!best) throw new Error('No viable Uniswap v3 pool for WETH→FBC');
-
-          const amountInMax = (best.amountIn * 102n) / 100n; // +2% slippage
-          const deadline = BigInt(Math.floor(Date.now() / 1000) + 600);
-
-          const params = {
-            tokenIn: WETH_BASE,
-            tokenOut: CONTRACT_ADDRESSES.fbc,
-            fee: best.fee,
-            recipient: account,
-            deadline,
-            amountOut,
-            amountInMaximum: amountInMax,
-            sqrtPriceLimitX96: 0n,
-          } as const;
-
-          // Simulate first
-          await simulateContract(publicClient, {
-            address: UNISWAP_V3_SWAP_ROUTER_02,
-            abi: ROUTER_V2_ABI as any,
-            functionName: 'exactOutputSingle',
-            args: [params],
-            value: amountInMax,
-            account,
-          });
-
-          // Execute
-          const swapHash = await walletClient.writeContract({
-            address: UNISWAP_V3_SWAP_ROUTER_02,
-            abi: ROUTER_V2_ABI as any,
-            functionName: 'exactOutputSingle',
-            args: [params],
-            value: amountInMax,
-            account,
-            chain: base,
-          });
-          await waitForTransactionReceipt(publicClient, { hash: swapHash });
-        } catch (uniErrSingle) {
-          // Fallback B: Multi-hop ETH -> USDC -> FBC
-          try {
-            const amountOut = missing;
-            let best: { fees: [number, number]; amountIn: bigint; usdc: `0x${string}` } | null = null;
-            for (const usdc of USDC_BASES) {
-              for (const fee01 of V3_FEE_TIERS) { // FBC<-WETH (last hop fee)
-                for (const fee12 of V3_FEE_TIERS) { // WETH<-USDC (first hop fee)
-                  try {
-                    // Path for exactOutput: tokenOut -> ... -> tokenIn
-                    const path = encodeV3PathExactOutput(
-                      [CONTRACT_ADDRESSES.fbc, WETH_BASE, usdc],
-                      [fee01, fee12]
-                    );
-                    const res: any = await readContract(publicClient, {
-                      address: UNISWAP_V3_QUOTER_V2,
-                      abi: QUOTER_V2_ABI as any,
-                      functionName: 'quoteExactOutput',
-                      args: [path, amountOut],
-                    });
-                    const amountIn = BigInt(res?.[0] ?? res?.amountIn ?? '0');
-                    if (amountIn > 0n && (!best || amountIn < best.amountIn)) {
-                      best = { fees: [fee01, fee12], amountIn, usdc };
-                    }
-                  } catch {}
-                }
-              }
-              if (best) break;
-            }
-            if (!best) throw new Error('No viable Uniswap v3 multi-hop path USDC→WETH→FBC');
-
-            const amountInMax = (best!.amountIn * 102n) / 100n; // +2% slippage
-            const deadline = BigInt(Math.floor(Date.now() / 1000) + 600);
-            const path = encodeV3PathExactOutput(
-              [CONTRACT_ADDRESSES.fbc, WETH_BASE, best!.usdc],
-              best!.fees
-            );
-            const params = {
-              path,
-              recipient: account,
-              deadline,
-              amountOut,
-              amountInMaximum: amountInMax,
-            } as const;
-
-            // Simulate
-            await simulateContract(publicClient, {
-              address: UNISWAP_V3_SWAP_ROUTER_02,
-              abi: ROUTER_V2_ABI as any,
-              functionName: 'exactOutput',
-              args: [params],
-              value: amountInMax,
-              account,
-            });
-
-            // Execute
-            const swapHash = await walletClient.writeContract({
-              address: UNISWAP_V3_SWAP_ROUTER_02,
-              abi: ROUTER_V2_ABI as any,
-              functionName: 'exactOutput',
-              args: [params],
-              value: amountInMax,
-              account,
-              chain: base,
-            });
-            await waitForTransactionReceipt(publicClient, { hash: swapHash });
-          } catch (uniErrMulti) {
-            const have = formatUnits(balance, 18);
-            const need = formatUnits(amountBigInt, 18);
-            throw new Error(`Insufficient FBC balance. You have ${have}, need ${need}. Autoswap failed: ${(swapErr as Error).message}; Uniswap v3 single-hop failed: ${(uniErrSingle as Error).message}; multi-hop failed: ${(uniErrMulti as Error).message}`);
-          }
-        }
-        const have = formatUnits(balance, 18);
-        const need = formatUnits(amountBigInt, 18);
-        // If we reached here, Uniswap swap succeeded; continue
-      }
-
-      // Re-check balance after swap
-      const newBal = await readContract(publicClient, {
-        address: CONTRACT_ADDRESSES.fbc,
-        abi: ERC20_ABI,
-        functionName: 'balanceOf',
-        args: [account],
-      });
-      if (newBal < amountBigInt) {
-        const have = formatUnits(newBal, 18);
-        const need = formatUnits(amountBigInt, 18);
-        throw new Error(`Swap did not acquire enough FBC. You have ${have}, need ${need}.`);
-      }
+      const have = formatUnits(balance, 18);
+      const need = formatUnits(amountBigInt, 18);
+      throw new Error(`Insufficient SOCCERHUNT balance. You have ${have}, need ${need}.`);
     }
 
     // Standardized: simulate → write → wait via wagmi actions
     const { hash } = await sendTx({
-      address: CONTRACT_ADDRESSES.fbc,
+      address: CONTRACT_ADDRESSES.soccerhunt,
       abi: ERC20_ABI as any,
       functionName: 'transfer',
       args: [to, amountBigInt],
@@ -419,23 +256,29 @@ export async function payInFBC(
 }
 
 /**
- * Send FBC tokens (alias for payInFBC)
+ * Send SOCCERHUNT tokens (alias for payInSOCCERHUNT)
  */
-export const sendFBC = payInFBC;
+export const sendSOCCERHUNT = payInSOCCERHUNT;
+// Temporary legacy alias
+export const sendFBC = payInSOCCERHUNT;
 
 /**
- * Format FBC amount from wei to readable format
+ * Format SOCCERHUNT amount from wei to readable format
  */
-export function formatFBC(amountWei: string | bigint): string {
+export function formatSOCCERHUNT(amountWei: string | bigint): string {
   return formatUnits(BigInt(amountWei), 18);
 }
+// Legacy alias
+export const formatFBC = formatSOCCERHUNT;
 
 /**
- * Parse FBC amount from readable format to wei
+ * Parse SOCCERHUNT amount from readable format to wei
  */
-export function parseFBC(amount: string): string {
+export function parseSOCCERHUNT(amount: string): string {
   return parseUnits(amount, 18).toString();
 }
+// Legacy alias
+export const parseFBC = parseSOCCERHUNT;
 
 /**
  * Calculate fee amount
