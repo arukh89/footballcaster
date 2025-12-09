@@ -1,0 +1,22 @@
+{
+  "miniapp": {
+    "name": "Football-Caster",
+    "version": "1",
+    "iconUrl": "https://football-caster-new.vercel.app/icon.png",
+    "homeUrl": "https://football-caster-new.vercel.app",
+    "buttonTitle": "Open App",
+    "splashImageUrl": "https://football-caster-new.vercel.app/splash.png",
+    "splashBackgroundColor": "#ffffff",
+    "subtitle": "Football Caster Auction App",
+    "description": "Build your dream team on Base. Trade players, compete, and dominate the leaderboard.",
+    "primaryCategory": "games",
+    "tags": ["game","social","community"],
+    "tagline": "Shoot your Balls",
+    "ogDescription": "Build your Squad, train, play P2P and VS AI"
+  },
+  "accountAssociation": {
+    "header": "eyJmaWQiOjI1MDcwNCwidHlwZSI6ImF1dGgiLCJrZXkiOiIweDA5RDAyRDI1RDBEMDgyZjdGMkUwNGI0ODM4Y0VmZTI3MWIyZGFCMDkifQ",
+    "payload": "eyJkb21haW4iOiJmb290YmFsbC1jYXN0ZXItbmV3LnZlcmNlbC5hcHAifQ",
+    "signature": "ff/prhxCIzG5/AqPGFMe9rB6uUW8rPJPHxAflxu4ZxFPHf3s7cCk9Mg3cOvblSAdH/4WOlpmK3/vKCUqu9Enqxs="
+  }
+}
