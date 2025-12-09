@@ -11,3 +11,4 @@ tsconfig.tsbuildinfo
 
 # Rust
 spacetime-server/rust/**/target/
+.vercel
