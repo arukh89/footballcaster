@@ -13,7 +13,7 @@ import { PriceTag } from '@/components/glass/PriceTag';
 import { useFarcasterIdentity } from '@/hooks/useFarcasterIdentity';
 import { useWallet } from '@/hooks/useWallet';
 import { API_ENDPOINTS } from '@/lib/constants';
-import { payInFBC, formatFBC } from '@/lib/wallet-utils';
+import { payInSOCCERHUNT, formatSOCCERHUNT } from '@/lib/wallet-utils';
 import { ChevronLeft, Gavel, ShoppingCart, Plus } from 'lucide-react';
 import { createConfig } from 'wagmi';
 import { wagmiConfig } from '@/lib/wagmi-config';
@@ -118,8 +118,8 @@ export default function AuctionDetailPage(): React.JSX.Element {
       const sellerWallet = auction.sellerWallet as `0x${string}`;
       const amountWei = auction.buyNowFbcWei;
 
-      // Pay in FBC
-      const { hash } = await payInFBC(walletClient as any, walletPublicClient as any, sellerWallet, amountWei);
+      // Pay in SOCCERHUNT
+      const { hash } = await payInSOCCERHUNT(walletClient as any, walletPublicClient as any, sellerWallet, amountWei);
 
       // Verify and execute buy-now
       const res = await fetch(API_ENDPOINTS.auction.buyNow, {
@@ -240,7 +240,7 @@ export default function AuctionDetailPage(): React.JSX.Element {
                 {bidding ? 'Placing Bid...' : (
                   <>
                     <Gavel className="mr-2 h-4 w-4" />
-                    Place Bid ({formatFBC(auction.bidIncrementFbc)} FBC)
+                    Place Bid ({formatSOCCERHUNT(auction.bidIncrementFbc)} SOCCERHUNT)
                   </>
                 )}
               </Button>

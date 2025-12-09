@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { quickAuth } from "@farcaster/miniapp-sdk";
 import { useIsInFarcaster } from "@/hooks/useIsInFarcaster";
 import { useWallet } from "@/hooks/useWallet";
-import { payInFBC, formatFBC } from "@/lib/wallet-utils";
+import { payInSOCCERHUNT, formatSOCCERHUNT } from "@/lib/wallet-utils";
 import { CONTRACT_ADDRESSES, DEV_FID } from "@/lib/constants";
 import { useFarcasterIdentity } from "@/hooks/useFarcasterIdentity";
 import { createWalletClient, http, createPublicClient } from "viem";
@@ -131,7 +131,7 @@ export function StarterPackCard(): JSX.Element | null {
       }
 
       // Pay to treasury
-      const { hash } = await payInFBC(
+      const { hash } = await payInSOCCERHUNT(
         walletClient as any, 
         walletPublicClient as any, 
         CONTRACT_ADDRESSES.treasury, 
@@ -191,7 +191,7 @@ export function StarterPackCard(): JSX.Element | null {
           
           {quote && step === 'payment' && (
             <div className="mb-3 p-2 bg-gray-100 dark:bg-gray-800 rounded">
-              <div className="text-sm">Price: {formatFBC(quote.amountWei)} FBC</div>
+              <div className="text-sm">Price: {formatSOCCERHUNT(quote.amountWei)} SOCCERHUNT</div>
               <div className="text-xs text-muted-foreground">(~${quote.usdAmount || '1'} USD)</div>
             </div>
           )}
