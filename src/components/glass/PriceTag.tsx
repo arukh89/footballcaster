@@ -1,6 +1,6 @@
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { formatFBC } from '@/lib/wallet-utils';
+import { formatSOCCERHUNT } from '@/lib/wallet-utils';
 
 interface PriceTagProps {
   type: 'bid' | 'ask' | 'fixed' | 'auction';
@@ -45,7 +45,7 @@ export function PriceTag({
       <div className="mt-1">
         {priceFbcWei && (
           <div className="text-lg font-bold">
-            {formatFBC(priceFbcWei)} FBC
+            {formatSOCCERHUNT(priceFbcWei)} SOCCERHUNT
           </div>
         )}
         {pointValue !== undefined && (

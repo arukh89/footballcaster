@@ -1,12 +1,13 @@
 /**
- * Verification Service - On-chain FBC transfer verification
+ * Verification Service - On-chain SOCCERHUNT transfer verification
  */
 
 import { createPublicClient, http, type Address, type Hash } from 'viem';
 import { base } from 'viem/chains';
 import { getFBCPrice, calculateFBCAmount } from './pricing';
+import { CONTRACT_ADDRESSES } from '@/lib/constants';
 
-const FBC_ADDRESS = (process.env.NEXT_PUBLIC_FBC_ADDRESS as Address) || '0xcb6e9f9bab4164eaa97c982dee2d2aaffdb9ab07';
+const SOCCERHUNT_ADDRESS = CONTRACT_ADDRESSES.soccerhunt as Address;
 const RPC_URL = process.env.BASE_RPC_URL || 'https://mainnet.base.org';
 
 function normalizeAddress(addr: Address): Address {
@@ -59,9 +60,9 @@ function decodeTransferLog(log: { topics: readonly `0x${string}`[]; data: `0x${s
 }
 
 /**
- * Verify FBC transfer matches expected parameters
+ * Verify SOCCERHUNT transfer matches expected parameters
  */
-export async function verifyFBCTransfer(
+export async function verifySOCCERHUNTTransfer(
   txHash: Hash,
   expectedFrom: Address,
   expectedTo: Address,
@@ -88,16 +89,16 @@ export async function verifyFBCTransfer(
       return { valid: false, error: `Insufficient confirmations: ${confirmations}/${REQUIRED}` };
     }
 
-    // Find Transfer event for FBC token
+    // Find Transfer event for SOCCERHUNT token
     const transferLog = receipt.logs.find((log) => {
       return (
-        normalizeAddress(log.address as Address) === normalizeAddress(FBC_ADDRESS) &&
+        normalizeAddress(log.address as Address) === normalizeAddress(SOCCERHUNT_ADDRESS) &&
         log.topics[0] === TRANSFER_EVENT_SIGNATURE
       );
     });
 
     if (!transferLog) {
-      return { valid: false, error: 'No FBC transfer found in transaction' };
+      return { valid: false, error: 'No SOCCERHUNT transfer found in transaction' };
     }
 
     const transfer = decodeTransferLog(transferLog);
@@ -162,9 +163,9 @@ export async function verifyFBCTransfer(
 }
 
 /**
- * Verify any FBC transfer (for marketplace/auctions)
+ * Verify any SOCCERHUNT transfer (for marketplace/auctions)
  */
-export async function verifyFBCTransferExact(
+export async function verifySOCCERHUNTTransferExact(
   txHash: Hash,
   expectedFrom: Address,
   expectedTo: Address,
@@ -187,13 +188,13 @@ export async function verifyFBCTransferExact(
 
     const transferLog = receipt.logs.find((log) => {
       return (
-        normalizeAddress(log.address as Address) === normalizeAddress(FBC_ADDRESS) &&
+        normalizeAddress(log.address as Address) === normalizeAddress(SOCCERHUNT_ADDRESS) &&
         log.topics[0] === TRANSFER_EVENT_SIGNATURE
       );
     });
 
     if (!transferLog) {
-      return { valid: false, error: 'No FBC transfer found' };
+      return { valid: false, error: 'No SOCCERHUNT transfer found' };
     }
 
     const transfer = decodeTransferLog(transferLog);
@@ -230,3 +231,7 @@ export async function verifyFBCTransferExact(
     };
   }
 }
+
+// Legacy aliases during refactor
+export const verifyFBCTransfer = verifySOCCERHUNTTransfer;
+export const verifyFBCTransferExact = verifySOCCERHUNTTransferExact;

@@ -11,7 +11,7 @@ import { PlayerCard } from '@/components/PlayerCard';
 import { DesktopNav, Navigation } from '@/components/Navigation';
 import { useFarcasterIdentity } from '@/hooks/useFarcasterIdentity';
 // Snapshots removed
-import { parseFBC } from '@/lib/wallet-utils';
+import { parseSOCCERHUNT } from '@/lib/wallet-utils';
 import type { Player } from '@/lib/types';
 
 export default function CreateAuctionPage(): JSX.Element {
@@ -51,8 +51,8 @@ export default function CreateAuctionPage(): JSX.Element {
       setError(null);
 
       if (!selectedId) throw new Error('Select a player');
-      const reserveFbcWei = parseFBC(reserve || '1');
-      const buyNowFbcWei = buyNow ? parseFBC(buyNow) : undefined;
+      const reserveFbcWei = parseSOCCERHUNT(reserve || '1');
+      const buyNowFbcWei = buyNow ? parseSOCCERHUNT(buyNow) : undefined;
       const durationH = parseInt(duration || '48', 10);
 
       const res = await fetch('/api/auctions', {
@@ -114,13 +114,13 @@ export default function CreateAuctionPage(): JSX.Element {
 
                 <div>
                   <div className="text-xs font-semibold mb-1 flex items-center gap-2">
-                    <DollarSign className="h-4 w-4" /> Reserve (FBC)
+                    <DollarSign className="h-4 w-4" /> Reserve (SOCCERHUNT)
                   </div>
                   <Input value={reserve} onChange={(e) => setReserve(e.target.value)} placeholder="1" />
                 </div>
 
                 <div>
-                  <div className="text-xs font-semibold mb-1">Buy Now (FBC, optional)</div>
+                  <div className="text-xs font-semibold mb-1">Buy Now (SOCCERHUNT, optional)</div>
                   <Input value={buyNow} onChange={(e) => setBuyNow(e.target.value)} placeholder="" />
                 </div>
 
